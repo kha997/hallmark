@@ -62,8 +62,11 @@ REGISTRY_PATH_MISSING
 ```
 
 Containment is determined from normalized absolute paths and `path.relative`,
-not a string-prefix comparison. Validation never reads or trusts an entity path
-outside the Hallmark package.
+not a string-prefix comparison. Existing targets are also checked after
+canonical path resolution so an in-package symlink cannot authorize a target
+outside the package. Validation does not read a registry document until its
+path passes containment and existence checks, and never reads or trusts an
+entity path outside the Hallmark package.
 
 ## Scope boundary
 
