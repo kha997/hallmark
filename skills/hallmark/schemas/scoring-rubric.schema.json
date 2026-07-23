@@ -1,0 +1,39 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://kha997.github.io/hallmark/schemas/scoring-rubric.schema.json",
+  "title": "Hallmark Scoring Rubric",
+  "type": "object",
+  "required": ["id", "schemaVersion", "version", "status", "scale", "aggregation", "categories", "owns"],
+  "properties": {
+    "id": { "type": "string", "pattern": "^rubric\\.[a-z0-9]+(?:-[a-z0-9]+)*$" },
+    "schemaVersion": { "type": "string", "format": "semver" },
+    "version": { "type": "string", "format": "semver" },
+    "status": { "enum": ["confirmed", "compatibility-placeholder", "proposed", "deprecated"] },
+    "scale": {
+      "type": "object",
+      "required": ["minimum", "maximum"],
+      "properties": {
+        "minimum": { "type": "number" },
+        "maximum": { "type": "number" }
+      },
+      "additionalProperties": false
+    },
+    "aggregation": { "const": "weighted-sum" },
+    "formula": { "const": "overall = Σ(category score × category weight)" },
+    "categories": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["id", "weight", "assessment"],
+        "properties": {
+          "id": { "type": "string" },
+          "weight": { "type": "number", "minimum": 0, "maximum": 1 },
+          "assessment": { "enum": ["machine", "agent", "hybrid"] }
+        },
+        "additionalProperties": false
+      }
+    },
+    "owns": { "type": "array", "uniqueItems": true, "items": { "type": "string" } }
+  },
+  "additionalProperties": false
+}

@@ -1,0 +1,22 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://kha997.github.io/hallmark/schemas/module.schema.json",
+  "title": "Hallmark Module Entity",
+  "type": "object",
+  "required": ["id", "schemaVersion", "version", "status", "path", "public", "intents", "dependencies", "appliesTo", "capabilities", "outputs", "owns"],
+  "properties": {
+    "id": { "type": "string", "pattern": "^module\\.[a-z0-9]+(?:-[a-z0-9]+)*$" },
+    "schemaVersion": { "type": "string", "format": "semver" },
+    "version": { "type": "string", "format": "semver" },
+    "status": { "enum": ["confirmed", "compatibility-placeholder", "proposed", "deprecated"] },
+    "path": { "type": "string", "minLength": 1 },
+    "public": { "type": "boolean" },
+    "intents": { "type": "array", "uniqueItems": true, "items": { "type": "string" } },
+    "dependencies": { "type": "array", "uniqueItems": true, "items": { "type": "string" } },
+    "appliesTo": { "type": "array", "uniqueItems": true, "items": { "type": "string" } },
+    "capabilities": { "type": "array", "uniqueItems": true, "items": { "type": "string" } },
+    "outputs": { "type": "array", "uniqueItems": true, "items": { "type": "string" } },
+    "owns": { "type": "array", "uniqueItems": true, "items": { "type": "string" } }
+  },
+  "additionalProperties": false
+}

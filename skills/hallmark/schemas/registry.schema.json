@@ -1,0 +1,30 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://kha997.github.io/hallmark/schemas/registry.schema.json",
+  "title": "Hallmark Registry Manifest",
+  "type": "object",
+  "required": ["schemaVersion", "registryVersion", "publicInvocations", "registries"],
+  "properties": {
+    "schemaVersion": { "type": "string", "format": "semver" },
+    "registryVersion": { "type": "string", "format": "semver" },
+    "publicInvocations": {
+      "type": "array",
+      "uniqueItems": true,
+      "items": { "enum": ["build", "audit", "redesign", "study"] }
+    },
+    "registries": {
+      "type": "object",
+      "required": ["modules", "principles", "domains", "profiles", "relations", "scoring"],
+      "additionalProperties": false,
+      "properties": {
+        "modules": { "type": "string" },
+        "principles": { "type": "string" },
+        "domains": { "type": "string" },
+        "profiles": { "type": "string" },
+        "relations": { "type": "string" },
+        "scoring": { "type": "string" }
+      }
+    }
+  },
+  "additionalProperties": false
+}
