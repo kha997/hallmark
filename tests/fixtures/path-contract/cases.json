@@ -1,0 +1,38 @@
+[
+  {
+    "name": "rejects an empty registry path",
+    "path": "",
+    "exists": true,
+    "expectedCodes": ["REGISTRY_PATH_INVALID"]
+  },
+  {
+    "name": "rejects traversal outside the package",
+    "path": "../../outside.md",
+    "exists": true,
+    "expectedCodes": ["REGISTRY_PATH_OUTSIDE_PACKAGE"]
+  },
+  {
+    "name": "rejects an absolute POSIX path",
+    "path": "/tmp/file.md",
+    "exists": true,
+    "expectedCodes": ["REGISTRY_PATH_ABSOLUTE"]
+  },
+  {
+    "name": "rejects a Windows drive-letter path",
+    "path": "C:\\private\\file.md",
+    "exists": true,
+    "expectedCodes": ["REGISTRY_PATH_ABSOLUTE"]
+  },
+  {
+    "name": "rejects a UNC path",
+    "path": "\\\\server\\share\\file.md",
+    "exists": true,
+    "expectedCodes": ["REGISTRY_PATH_ABSOLUTE"]
+  },
+  {
+    "name": "rejects a file URL",
+    "path": "file:///tmp/file.md",
+    "exists": true,
+    "expectedCodes": ["REGISTRY_PATH_INVALID"]
+  }
+]

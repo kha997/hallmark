@@ -8,6 +8,18 @@ Make the existing Hallmark entry point consume canonical registry data while
 preserving all public invocation, installation, state-file, output, and
 showcase contracts.
 
+## Entry prerequisite
+
+Phase B runtime work may begin only after Phase B0 — Registry Contract
+Hardening is merged and green. The prerequisite requires exact v1 child
+registry schema compatibility, exactly one confirmed owner for every existing
+public invocation, and normalized plus canonical package-containment checks for
+every registry-owned filesystem path.
+
+Phase B must consume those contracts without weakening or bypassing their
+diagnostics. Phase B0 itself adds no registry-driven routing or engine
+execution.
+
 ## Capability semantics
 
 - **Audit** evaluates an existing artifact at the user's request and remains
