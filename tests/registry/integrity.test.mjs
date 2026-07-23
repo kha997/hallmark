@@ -113,5 +113,9 @@ test("malformed registry documents produce diagnostics without crashing", () => 
   const codes = diagnostics.map((item) => item.code);
 
   assert.equal(codes.includes("INVALID_FIELD_TYPE"), true);
+  assert.equal(
+    codes.filter((code) => code === "INVALID_ENTITY_TYPE").length,
+    2,
+  );
   assert.equal(codes.includes("MISSING_REGISTRY_FILE"), true);
 });

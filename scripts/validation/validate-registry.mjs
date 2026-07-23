@@ -122,6 +122,10 @@ function diagnostic(code, details = {}) {
   return { code, ...details };
 }
 
+function isEntityObject(value) {
+  return value !== null && typeof value === "object" && !Array.isArray(value);
+}
+
 export function validateManifestShape(manifest) {
   const diagnostics = [];
   for (const field of ["registryVersion", "publicInvocations", "registries"]) {
@@ -179,6 +183,16 @@ export function validateManifestShape(manifest) {
 }
 
 export function validateEntityShape(entity, registryName) {
+  if (!isEntityObject(entity)) {
+    return [
+      diagnostic("INVALID_ENTITY_TYPE", {
+        registry: registryName,
+        expected: "object",
+        value: entity,
+      }),
+    ];
+  }
+
   const diagnostics = [];
   const required = REQUIRED_ENTITY_FIELDS[registryName] ?? [];
 
@@ -345,13 +359,17 @@ export function validateRegistry(root = repositoryRoot) {
     }
   }
 
-  const entities = registryDocuments.flatMap((document) => document.entities);
+  const entities = registryDocuments
+    .flatMap((document) => document.entities)
+    .filter(isEntityObject);
   const modules =
-    registryDocuments.find((document) => document.name === "modules")?.entities ??
-    [];
+    registryDocuments
+      .find((document) => document.name === "modules")
+      ?.entities.filter(isEntityObject) ?? [];
   const relations =
-    registryDocuments.find((document) => document.name === "relations")?.entities ??
-    [];
+    registryDocuments
+      .find((document) => document.name === "relations")
+      ?.entities.filter(isEntityObject) ?? [];
 
   const ids = new Map();
   for (const document of registryDocuments) {
