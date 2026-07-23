@@ -1,6 +1,6 @@
 # Phase A — Architecture Foundation Specification
 
-Status: Approved  
+Status: Approved
 Date: 2026-07-23
 
 ## Objective

@@ -24,6 +24,22 @@
           "applicableRules": { "type": "array", "items": { "type": "string" } },
           "locations": { "type": "array", "items": { "type": "string" } }
         },
+        "oneOf": [
+          {
+            "properties": {
+              "notScored": { "const": true },
+              "score": { "const": null }
+            },
+            "required": ["score"]
+          },
+          {
+            "properties": {
+              "notScored": { "const": false },
+              "score": { "type": "number" }
+            },
+            "required": ["score"]
+          }
+        ],
         "additionalProperties": false
       }
     },

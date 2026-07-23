@@ -1,6 +1,6 @@
 # ADR 0001: Registry-Driven Single-Package Architecture
 
-Date: 2026-07-23  
+Date: 2026-07-23
 Status: Accepted
 
 ## Context

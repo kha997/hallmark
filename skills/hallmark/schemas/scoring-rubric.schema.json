@@ -3,7 +3,7 @@
   "$id": "https://kha997.github.io/hallmark/schemas/scoring-rubric.schema.json",
   "title": "Hallmark Scoring Rubric",
   "type": "object",
-  "required": ["id", "schemaVersion", "version", "status", "scale", "aggregation", "categories", "owns"],
+  "required": ["id", "schemaVersion", "version", "status", "scale", "aggregation", "formula", "thresholds", "severityLevels", "machineRules", "reportStructure", "categories", "owns"],
   "properties": {
     "id": { "type": "string", "pattern": "^rubric\\.[a-z0-9]+(?:-[a-z0-9]+)*$" },
     "schemaVersion": { "type": "string", "format": "semver" },
@@ -20,6 +20,44 @@
     },
     "aggregation": { "const": "weighted-sum" },
     "formula": { "const": "overall = Σ(category score × category weight)" },
+    "thresholds": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["id", "operator", "value"],
+        "properties": {
+          "id": { "type": "string" },
+          "operator": { "enum": [">", ">=", "<", "<=", "="] },
+          "value": { "type": "number" }
+        },
+        "additionalProperties": false
+      }
+    },
+    "severityLevels": {
+      "type": "array",
+      "minItems": 1,
+      "uniqueItems": true,
+      "items": { "enum": ["critical", "major", "minor", "advisory"] }
+    },
+    "machineRules": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["id", "categoryId", "severity"],
+        "properties": {
+          "id": { "type": "string" },
+          "categoryId": { "type": "string" },
+          "severity": { "enum": ["critical", "major", "minor", "advisory"] }
+        },
+        "additionalProperties": false
+      }
+    },
+    "reportStructure": {
+      "type": "array",
+      "minItems": 1,
+      "uniqueItems": true,
+      "items": { "type": "string" }
+    },
     "categories": {
       "type": "array",
       "items": {

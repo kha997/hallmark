@@ -1,6 +1,6 @@
 # Hallmark Repository Audit
 
-Date: 2026-07-23  
+Date: 2026-07-23
 Audited baseline: `aeb42fb354ff4efa36ab475773a082315a3af2ce`
 
 ## Audit boundary

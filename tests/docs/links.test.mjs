@@ -39,3 +39,37 @@ test("reports a broken relative Markdown link with its source line", () => {
     ],
   );
 });
+
+test("validates reference-style links", () => {
+  const root = fs.mkdtempSync(path.join(os.tmpdir(), "hallmark-links-"));
+  const docs = path.join(root, "docs");
+  fs.mkdirSync(docs);
+  fs.writeFileSync(
+    path.join(docs, "index.md"),
+    "See [the guide][guide].\n\n[guide]: missing.md\n",
+  );
+
+  assert.equal(
+    validateMarkdownLinks(root, ["docs/index.md"])[0].code,
+    "BROKEN_INTERNAL_LINK",
+  );
+});
+
+test("reports fragments that do not match a target heading", () => {
+  const root = fs.mkdtempSync(path.join(os.tmpdir(), "hallmark-links-"));
+  const docs = path.join(root, "docs");
+  fs.mkdirSync(docs);
+  fs.writeFileSync(path.join(docs, "index.md"), "See [topic](guide.md#missing).\n");
+  fs.writeFileSync(path.join(docs, "guide.md"), "# Existing\n");
+
+  assert.deepEqual(validateMarkdownLinks(root, ["docs/index.md"]), [
+    {
+      code: "BROKEN_INTERNAL_ANCHOR",
+      file: "docs/index.md",
+      line: 1,
+      target: "guide.md#missing",
+      resolvedPath: "docs/guide.md",
+      anchor: "missing",
+    },
+  ]);
+});

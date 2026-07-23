@@ -27,14 +27,213 @@ const registryDirectory = path.join(
   "skills/hallmark/registry",
 );
 
+const SUPPORTED_SCHEMA_VERSION = "1.0.0";
+const SUPPORTED_REGISTRY_VERSION = "1.0.0";
+const CURRENT_PUBLIC_INVOCATIONS = ["build", "audit", "redesign", "study"];
+const STATUSES = new Set([
+  "confirmed",
+  "compatibility-placeholder",
+  "proposed",
+  "deprecated",
+]);
+
+const REQUIRED_ENTITY_FIELDS = {
+  modules: [
+    "id",
+    "schemaVersion",
+    "version",
+    "status",
+    "path",
+    "public",
+    "intents",
+    "dependencies",
+    "appliesTo",
+    "capabilities",
+    "outputs",
+    "owns",
+  ],
+  principles: [
+    "id",
+    "schemaVersion",
+    "version",
+    "status",
+    "path",
+    "dependencies",
+    "appliesTo",
+    "capabilities",
+    "owns",
+  ],
+  domains: [
+    "id",
+    "schemaVersion",
+    "version",
+    "status",
+    "path",
+    "signals",
+    "dependencies",
+    "owns",
+  ],
+  profiles: [
+    "id",
+    "schemaVersion",
+    "version",
+    "status",
+    "kind",
+    "path",
+    "dependencies",
+    "appliesTo",
+    "owns",
+  ],
+  relations: [
+    "id",
+    "schemaVersion",
+    "version",
+    "status",
+    "from",
+    "relation",
+    "to",
+  ],
+  scoring: [
+    "id",
+    "schemaVersion",
+    "version",
+    "status",
+    "path",
+    "kind",
+    "public",
+    "dependencies",
+    "weighted",
+    "owns",
+  ],
+};
+
+const ARRAY_FIELDS = new Set([
+  "intents",
+  "dependencies",
+  "appliesTo",
+  "capabilities",
+  "outputs",
+  "owns",
+  "signals",
+]);
+
 function diagnostic(code, details = {}) {
   return { code, ...details };
+}
+
+export function validateManifestShape(manifest) {
+  const diagnostics = [];
+  for (const field of ["registryVersion", "publicInvocations", "registries"]) {
+    if (!(field in manifest)) {
+      diagnostics.push(
+        diagnostic("MISSING_REQUIRED_FIELD", {
+          entityId: "registry.manifest",
+          field,
+        }),
+      );
+    }
+  }
+
+  if (
+    "publicInvocations" in manifest &&
+    (!Array.isArray(manifest.publicInvocations) ||
+      manifest.publicInvocations.some((value) => typeof value !== "string"))
+  ) {
+    diagnostics.push(
+      diagnostic("INVALID_FIELD_TYPE", {
+        entityId: "registry.manifest",
+        field: "publicInvocations",
+        expected: "string[]",
+      }),
+    );
+  } else if ("publicInvocations" in manifest) {
+    const actual = [...new Set(manifest.publicInvocations)].sort();
+    const expected = [...CURRENT_PUBLIC_INVOCATIONS].sort();
+    if (JSON.stringify(actual) !== JSON.stringify(expected)) {
+      diagnostics.push(
+        diagnostic("PUBLIC_INVOCATION_CONTRACT_MISMATCH", {
+          expected,
+          actual,
+        }),
+      );
+    }
+  }
+
+  if (
+    "registries" in manifest &&
+    (manifest.registries === null ||
+      Array.isArray(manifest.registries) ||
+      typeof manifest.registries !== "object")
+  ) {
+    diagnostics.push(
+      diagnostic("INVALID_FIELD_TYPE", {
+        entityId: "registry.manifest",
+        field: "registries",
+        expected: "object",
+      }),
+    );
+  }
+
+  return diagnostics;
+}
+
+export function validateEntityShape(entity, registryName) {
+  const diagnostics = [];
+  const required = REQUIRED_ENTITY_FIELDS[registryName] ?? [];
+
+  for (const field of required) {
+    if (!(field in entity)) {
+      diagnostics.push(
+        diagnostic("MISSING_REQUIRED_FIELD", {
+          entityId: entity.id ?? "unknown",
+          field,
+        }),
+      );
+    }
+  }
+
+  if ("status" in entity && !STATUSES.has(entity.status)) {
+    diagnostics.push(
+      diagnostic("INVALID_STATUS", {
+        entityId: entity.id,
+        value: entity.status,
+      }),
+    );
+  }
+
+  for (const field of required.filter((candidate) => ARRAY_FIELDS.has(candidate))) {
+    if (field in entity && !Array.isArray(entity[field])) {
+      diagnostics.push(
+        diagnostic("INVALID_FIELD_TYPE", {
+          entityId: entity.id,
+          field,
+          expected: "array",
+        }),
+      );
+    }
+  }
+
+  if (
+    registryName === "modules" &&
+    "public" in entity &&
+    typeof entity.public !== "boolean"
+  ) {
+    diagnostics.push(
+      diagnostic("INVALID_FIELD_TYPE", {
+        entityId: entity.id,
+        field: "public",
+        expected: "boolean",
+      }),
+    );
+  }
+
+  return diagnostics;
 }
 
 export function validateRegistry(root = repositoryRoot) {
   const directory = path.join(root, "skills/hallmark/registry");
   const manifest = readJson(path.join(directory, "registry.json"));
-  const diagnostics = [];
+  const diagnostics = validateManifestShape(manifest);
 
   if (!isSemanticVersion(manifest.schemaVersion)) {
     diagnostics.push(
@@ -42,6 +241,14 @@ export function validateRegistry(root = repositoryRoot) {
         file: "registry.json",
         field: "schemaVersion",
         value: manifest.schemaVersion,
+      }),
+    );
+  } else if (manifest.schemaVersion !== SUPPORTED_SCHEMA_VERSION) {
+    diagnostics.push(
+      diagnostic("UNSUPPORTED_SCHEMA_VERSION", {
+        file: "registry.json",
+        value: manifest.schemaVersion,
+        supported: SUPPORTED_SCHEMA_VERSION,
       }),
     );
   }
@@ -54,9 +261,17 @@ export function validateRegistry(root = repositoryRoot) {
         value: manifest.registryVersion,
       }),
     );
+  } else if (manifest.registryVersion !== SUPPORTED_REGISTRY_VERSION) {
+    diagnostics.push(
+      diagnostic("UNSUPPORTED_REGISTRY_VERSION", {
+        file: "registry.json",
+        value: manifest.registryVersion,
+        supported: SUPPORTED_REGISTRY_VERSION,
+      }),
+    );
   }
 
-  const registryDocuments = Object.entries(manifest.registries).map(
+  const registryDocuments = Object.entries(manifest.registries ?? {}).map(
     ([name, relativePath]) => {
       const filePath = path.join(directory, relativePath);
       if (!fs.existsSync(filePath)) {
@@ -78,9 +293,29 @@ export function validateRegistry(root = repositoryRoot) {
           );
         }
       }
+      if (!Array.isArray(document.entities)) {
+        diagnostics.push(
+          diagnostic("INVALID_FIELD_TYPE", {
+            file: relativePath,
+            field: "entities",
+            expected: "array",
+          }),
+        );
+      }
       return { name, relativePath, entities: document.entities ?? [] };
     },
   );
+
+  for (const name of Object.keys(REQUIRED_ENTITY_FIELDS)) {
+    if (!registryDocuments.some((document) => document.name === name)) {
+      diagnostics.push(
+        diagnostic("MISSING_REGISTRY_FILE", {
+          registry: name,
+          path: manifest.registries?.[name] ?? null,
+        }),
+      );
+    }
+  }
 
   const entities = registryDocuments.flatMap((document) => document.entities);
   const modules =
@@ -91,6 +326,12 @@ export function validateRegistry(root = repositoryRoot) {
     [];
 
   const ids = new Map();
+  for (const document of registryDocuments) {
+    for (const entity of document.entities) {
+      diagnostics.push(...validateEntityShape(entity, document.name));
+    }
+  }
+
   for (const entity of entities) {
     diagnostics.push(...validateEntityIdentity(entity));
     const locations = ids.get(entity.id) ?? [];
