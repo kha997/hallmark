@@ -1,0 +1,105 @@
+{
+  "schemaVersion": "1.0.0",
+  "registryVersion": "1.0.0",
+  "entities": [
+    {
+      "id": "principle.anti-ai-slop",
+      "schemaVersion": "1.0.0",
+      "version": "1.1.0",
+      "status": "confirmed",
+      "path": "skills/hallmark/references/anti-patterns.md",
+      "dependencies": [],
+      "appliesTo": [],
+      "capabilities": ["anti-pattern-detection"],
+      "owns": ["knowledge.anti-ai-slop"]
+    },
+    {
+      "id": "principle.color",
+      "schemaVersion": "1.0.0",
+      "version": "1.1.0",
+      "status": "confirmed",
+      "path": "skills/hallmark/references/color.md",
+      "dependencies": [],
+      "appliesTo": [],
+      "capabilities": ["palette-construction", "contrast-guidance"],
+      "owns": ["knowledge.color"]
+    },
+    {
+      "id": "principle.interaction-states",
+      "schemaVersion": "1.0.0",
+      "version": "1.1.0",
+      "status": "confirmed",
+      "path": "skills/hallmark/references/interaction-and-states.md",
+      "dependencies": ["principle.microinteractions"],
+      "appliesTo": ["domain.component", "domain.page"],
+      "capabilities": ["state-design", "interaction-accessibility"],
+      "owns": ["knowledge.interaction-states"]
+    },
+    {
+      "id": "principle.layout-and-space",
+      "schemaVersion": "1.0.0",
+      "version": "1.1.0",
+      "status": "confirmed",
+      "path": "skills/hallmark/references/layout-and-space.md",
+      "dependencies": [],
+      "appliesTo": ["domain.page", "domain.landing-page", "domain.saas"],
+      "capabilities": ["layout-guidance", "spacing-guidance"],
+      "owns": ["knowledge.layout-and-space"]
+    },
+    {
+      "id": "principle.microinteractions",
+      "schemaVersion": "1.0.0",
+      "version": "1.1.0",
+      "status": "confirmed",
+      "path": "skills/hallmark/references/microinteractions.md",
+      "dependencies": ["principle.motion"],
+      "appliesTo": ["domain.component", "domain.page"],
+      "capabilities": ["microinteraction-guidance"],
+      "owns": ["knowledge.microinteractions"]
+    },
+    {
+      "id": "principle.motion",
+      "schemaVersion": "1.0.0",
+      "version": "1.1.0",
+      "status": "confirmed",
+      "path": "skills/hallmark/references/motion.md",
+      "dependencies": [],
+      "appliesTo": ["domain.component", "domain.page"],
+      "capabilities": ["motion-guidance", "reduced-motion-guidance"],
+      "owns": ["knowledge.motion"]
+    },
+    {
+      "id": "principle.responsive-design",
+      "schemaVersion": "1.0.0",
+      "version": "1.1.0",
+      "status": "confirmed",
+      "path": "skills/hallmark/references/responsive.md",
+      "dependencies": ["principle.layout-and-space"],
+      "appliesTo": ["domain.component", "domain.page", "domain.landing-page", "domain.saas"],
+      "capabilities": ["responsive-guidance"],
+      "owns": ["knowledge.responsive-design"]
+    },
+    {
+      "id": "principle.structural-variety",
+      "schemaVersion": "1.0.0",
+      "version": "1.1.0",
+      "status": "confirmed",
+      "path": "skills/hallmark/references/structure.md",
+      "dependencies": ["principle.layout-and-space"],
+      "appliesTo": ["domain.page", "domain.landing-page", "domain.saas"],
+      "capabilities": ["structural-variety", "fingerprint-selection"],
+      "owns": ["knowledge.structural-variety"]
+    },
+    {
+      "id": "principle.typography",
+      "schemaVersion": "1.0.0",
+      "version": "1.1.0",
+      "status": "confirmed",
+      "path": "skills/hallmark/references/typography.md",
+      "dependencies": [],
+      "appliesTo": [],
+      "capabilities": ["type-selection", "type-scale", "type-pairing"],
+      "owns": ["knowledge.typography"]
+    }
+  ]
+}

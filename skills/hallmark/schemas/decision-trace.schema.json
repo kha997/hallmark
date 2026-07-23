@@ -1,0 +1,60 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://kha997.github.io/hallmark/schemas/decision-trace.schema.json",
+  "title": "Hallmark Decision Trace",
+  "type": "object",
+  "required": ["schemaVersion", "engineVersion", "input", "precedence", "decision", "confidence", "confidenceBand", "ambiguity", "assumptions", "fallback"],
+  "properties": {
+    "schemaVersion": { "type": "string", "format": "semver" },
+    "engineVersion": { "type": "string", "format": "semver" },
+    "input": {
+      "type": "object",
+      "required": ["intent", "signals"],
+      "properties": {
+        "intent": { "type": "string" },
+        "artifact": { "type": ["string", "null"] },
+        "signals": { "type": "array", "items": { "type": "string" } }
+      },
+      "additionalProperties": true
+    },
+    "precedence": {
+      "type": "array",
+      "minItems": 1,
+      "items": { "type": "string" }
+    },
+    "decision": {
+      "type": "object",
+      "required": ["moduleId", "loadedEntityIds"],
+      "properties": {
+        "moduleId": { "type": "string" },
+        "domainId": { "type": ["string", "null"] },
+        "loadedEntityIds": { "type": "array", "uniqueItems": true, "items": { "type": "string" } }
+      },
+      "additionalProperties": false
+    },
+    "confidence": { "type": "number", "minimum": 0, "maximum": 1 },
+    "confidenceBand": { "enum": ["high", "medium", "low"] },
+    "ambiguity": {
+      "type": "object",
+      "required": ["materiality", "action", "reason"],
+      "properties": {
+        "materiality": { "enum": ["none", "low", "material"] },
+        "action": { "enum": ["proceed", "record-assumption", "ask-question", "reversible-default"] },
+        "reason": { "type": "string" }
+      },
+      "additionalProperties": false
+    },
+    "assumptions": { "type": "array", "items": { "type": "string" } },
+    "question": { "type": ["string", "null"] },
+    "fallback": {
+      "type": "object",
+      "required": ["used", "reason"],
+      "properties": {
+        "used": { "type": "boolean" },
+        "reason": { "type": ["string", "null"] }
+      },
+      "additionalProperties": false
+    }
+  },
+  "additionalProperties": false
+}

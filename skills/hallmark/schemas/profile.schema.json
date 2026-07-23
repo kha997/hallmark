@@ -1,0 +1,19 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://kha997.github.io/hallmark/schemas/profile.schema.json",
+  "title": "Hallmark Profile Entity",
+  "type": "object",
+  "required": ["id", "schemaVersion", "version", "status", "kind", "path", "dependencies", "appliesTo", "owns"],
+  "properties": {
+    "id": { "type": "string", "pattern": "^profile\\.[a-z0-9]+(?:-[a-z0-9]+)*(?:\\.[a-z0-9]+(?:-[a-z0-9]+)*)+$" },
+    "schemaVersion": { "type": "string", "format": "semver" },
+    "version": { "type": "string", "format": "semver" },
+    "status": { "enum": ["confirmed", "compatibility-placeholder", "proposed", "deprecated"] },
+    "kind": { "enum": ["brand", "industry", "persona", "design-system"] },
+    "path": { "type": "string", "minLength": 1 },
+    "dependencies": { "type": "array", "uniqueItems": true, "items": { "type": "string" } },
+    "appliesTo": { "type": "array", "uniqueItems": true, "items": { "type": "string" } },
+    "owns": { "type": "array", "uniqueItems": true, "items": { "type": "string" } }
+  },
+  "additionalProperties": false
+}

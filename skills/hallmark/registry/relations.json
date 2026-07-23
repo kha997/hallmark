@@ -1,0 +1,33 @@
+{
+  "schemaVersion": "1.0.0",
+  "registryVersion": "1.0.0",
+  "entities": [
+    {
+      "id": "relation.audit-evaluates-slop-test",
+      "schemaVersion": "1.0.0",
+      "version": "1.0.0",
+      "status": "confirmed",
+      "from": "module.audit",
+      "relation": "uses",
+      "to": "evaluation.slop-test"
+    },
+    {
+      "id": "relation.build-uses-pre-emit-critique",
+      "schemaVersion": "1.0.0",
+      "version": "1.0.0",
+      "status": "confirmed",
+      "from": "module.build",
+      "relation": "uses",
+      "to": "evaluation.pre-emit-critique"
+    },
+    {
+      "id": "relation.build-uses-slop-test",
+      "schemaVersion": "1.0.0",
+      "version": "1.0.0",
+      "status": "confirmed",
+      "from": "module.build",
+      "relation": "uses",
+      "to": "evaluation.slop-test"
+    }
+  ]
+}

@@ -1,0 +1,77 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://kha997.github.io/hallmark/schemas/scoring-rubric.schema.json",
+  "title": "Hallmark Scoring Rubric",
+  "type": "object",
+  "required": ["id", "schemaVersion", "version", "status", "scale", "aggregation", "formula", "thresholds", "severityLevels", "machineRules", "reportStructure", "categories", "owns"],
+  "properties": {
+    "id": { "type": "string", "pattern": "^rubric\\.[a-z0-9]+(?:-[a-z0-9]+)*$" },
+    "schemaVersion": { "type": "string", "format": "semver" },
+    "version": { "type": "string", "format": "semver" },
+    "status": { "enum": ["confirmed", "compatibility-placeholder", "proposed", "deprecated"] },
+    "scale": {
+      "type": "object",
+      "required": ["minimum", "maximum"],
+      "properties": {
+        "minimum": { "type": "number" },
+        "maximum": { "type": "number" }
+      },
+      "additionalProperties": false
+    },
+    "aggregation": { "const": "weighted-sum" },
+    "formula": { "const": "overall = Σ(category score × category weight)" },
+    "thresholds": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["id", "operator", "value"],
+        "properties": {
+          "id": { "type": "string" },
+          "operator": { "enum": [">", ">=", "<", "<=", "="] },
+          "value": { "type": "number" }
+        },
+        "additionalProperties": false
+      }
+    },
+    "severityLevels": {
+      "type": "array",
+      "minItems": 1,
+      "uniqueItems": true,
+      "items": { "enum": ["critical", "major", "minor", "advisory"] }
+    },
+    "machineRules": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["id", "categoryId", "severity"],
+        "properties": {
+          "id": { "type": "string" },
+          "categoryId": { "type": "string" },
+          "severity": { "enum": ["critical", "major", "minor", "advisory"] }
+        },
+        "additionalProperties": false
+      }
+    },
+    "reportStructure": {
+      "type": "array",
+      "minItems": 1,
+      "uniqueItems": true,
+      "items": { "type": "string" }
+    },
+    "categories": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["id", "weight", "assessment"],
+        "properties": {
+          "id": { "type": "string" },
+          "weight": { "type": "number", "minimum": 0, "maximum": 1 },
+          "assessment": { "enum": ["machine", "agent", "hybrid"] }
+        },
+        "additionalProperties": false
+      }
+    },
+    "owns": { "type": "array", "uniqueItems": true, "items": { "type": "string" } }
+  },
+  "additionalProperties": false
+}
