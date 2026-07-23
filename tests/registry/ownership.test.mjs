@@ -22,23 +22,78 @@ test("reports duplicate canonical ownership", () => {
   ]);
 });
 
-test("requires exactly one public module for every public invocation", () => {
+test("reports a missing public invocation owner", () => {
   const modules = [
-    { id: "module.build", public: true, intents: ["build"] },
-    { id: "module.audit", public: true, intents: ["audit"] },
+    {
+      id: "module.build",
+      public: true,
+      status: "confirmed",
+      intents: ["build"],
+    },
   ];
 
   assert.deepEqual(
-    validatePublicInvocations(["build", "audit", "study"], modules),
+    validatePublicInvocations(["build", "audit"], modules),
     [
       {
-        code: "PUBLIC_INVOCATION_OWNER_COUNT",
-        invocation: "study",
+        code: "PUBLIC_INVOCATION_OWNER_MISSING",
+        invocation: "audit",
         owners: [],
       },
     ],
   );
 });
+
+test("reports duplicate public invocation owners", () => {
+  const modules = [
+    {
+      id: "module.build",
+      public: true,
+      status: "confirmed",
+      intents: ["build"],
+    },
+    {
+      id: "module.build-alternate",
+      public: true,
+      status: "confirmed",
+      intents: ["build"],
+    },
+  ];
+
+  assert.deepEqual(validatePublicInvocations(["build"], modules), [
+    {
+      code: "PUBLIC_INVOCATION_OWNER_DUPLICATE",
+      invocation: "build",
+      owners: ["module.build", "module.build-alternate"],
+    },
+  ]);
+});
+
+for (const status of [
+  "proposed",
+  "deprecated",
+  "compatibility-placeholder",
+]) {
+  test(`rejects a ${status} public invocation owner`, () => {
+    const modules = [
+      {
+        id: "module.build",
+        public: true,
+        status,
+        intents: ["build"],
+      },
+    ];
+
+    assert.deepEqual(validatePublicInvocations(["build"], modules), [
+      {
+        code: "PUBLIC_INVOCATION_OWNER_NOT_CONFIRMED",
+        invocation: "build",
+        owner: "module.build",
+        status,
+      },
+    ]);
+  });
+}
 
 test("reports registered paths that do not exist", () => {
   const entities = [
@@ -47,7 +102,7 @@ test("reports registered paths that do not exist", () => {
 
   assert.deepEqual(validateRegisteredPaths("/repository", entities, () => false), [
     {
-      code: "MISSING_REGISTERED_PATH",
+      code: "REGISTRY_PATH_MISSING",
       entityId: "module.build",
       path: "skills/hallmark/does-not-exist.md",
     },

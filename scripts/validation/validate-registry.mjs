@@ -17,6 +17,7 @@ import {
   readJson,
   validateCanonicalOwnership,
   validatePublicInvocations,
+  validateRegistryPath,
   validateRegisteredPaths,
 } from "./lib/repository.mjs";
 
@@ -312,15 +313,20 @@ export function validateRegistry(root = repositoryRoot) {
         return { name, relativePath, entities: [] };
       }
 
-      const filePath = path.join(directory, relativePath);
-      if (!fs.existsSync(filePath)) {
+      const pathDiagnostics = validateRegistryPath({
+        rawPath: relativePath,
+        baseDirectory: directory,
+        packageDirectory: path.join(root, "skills/hallmark"),
+        realpath: fs.realpathSync,
+      });
+      if (pathDiagnostics.length > 0) {
         diagnostics.push(
-          diagnostic("MISSING_REGISTRY_FILE", { registry: name, path: relativePath }),
+          ...pathDiagnostics.map((item) => ({ ...item, registry: name })),
         );
         return { name, relativePath, entities: [] };
       }
 
-      const document = readJson(filePath);
+      const document = readJson(path.resolve(directory, relativePath));
       for (const field of ["schemaVersion", "registryVersion"]) {
         if (!isSemanticVersion(document[field])) {
           diagnostics.push(
@@ -331,6 +337,18 @@ export function validateRegistry(root = repositoryRoot) {
             }),
           );
         }
+      }
+      if (
+        isSemanticVersion(document.schemaVersion) &&
+        document.schemaVersion !== manifest.schemaVersion
+      ) {
+        diagnostics.push(
+          diagnostic("REGISTRY_SCHEMA_VERSION_MISMATCH", {
+            file: relativePath,
+            expected: manifest.schemaVersion,
+            actual: document.schemaVersion,
+          }),
+        );
       }
       const entities = Array.isArray(document.entities)
         ? document.entities

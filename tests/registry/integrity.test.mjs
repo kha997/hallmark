@@ -117,5 +117,22 @@ test("malformed registry documents produce diagnostics without crashing", () => 
     codes.filter((code) => code === "INVALID_ENTITY_TYPE").length,
     2,
   );
-  assert.equal(codes.includes("MISSING_REGISTRY_FILE"), true);
+  assert.equal(codes.includes("REGISTRY_PATH_MISSING"), true);
+});
+
+test("reports a child registry schema-version mismatch", () => {
+  const fixtureRoot = path.resolve(
+    testDirectory,
+    "../fixtures/schema-version-mismatch",
+  );
+  const diagnostic = validateRegistry(fixtureRoot).find(
+    (item) => item.code === "REGISTRY_SCHEMA_VERSION_MISMATCH",
+  );
+
+  assert.deepEqual(diagnostic, {
+    code: "REGISTRY_SCHEMA_VERSION_MISMATCH",
+    file: "modules.json",
+    expected: "1.0.0",
+    actual: "2.0.0",
+  });
 });

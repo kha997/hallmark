@@ -29,14 +29,26 @@ export function validatePublicInvocations(publicInvocations, modules) {
       .filter(
         (module) =>
           module.public === true && (module.intents ?? []).includes(invocation),
-      )
-      .map((module) => module.id);
+      );
 
-    if (owners.length !== 1) {
+    if (owners.length === 0) {
       diagnostics.push({
-        code: "PUBLIC_INVOCATION_OWNER_COUNT",
+        code: "PUBLIC_INVOCATION_OWNER_MISSING",
         invocation,
-        owners,
+        owners: [],
+      });
+    } else if (owners.length > 1) {
+      diagnostics.push({
+        code: "PUBLIC_INVOCATION_OWNER_DUPLICATE",
+        invocation,
+        owners: owners.map((module) => module.id),
+      });
+    } else if (owners[0].status !== "confirmed") {
+      diagnostics.push({
+        code: "PUBLIC_INVOCATION_OWNER_NOT_CONFIRMED",
+        invocation,
+        owner: owners[0].id,
+        status: owners[0].status,
       });
     }
   }
@@ -56,19 +68,86 @@ export function validatePublicInvocations(publicInvocations, modules) {
   return diagnostics;
 }
 
+export function validateRegistryPath({
+  rawPath,
+  baseDirectory,
+  packageDirectory,
+  exists = fs.existsSync,
+  realpath = null,
+}) {
+  if (
+    typeof rawPath !== "string" ||
+    rawPath.length === 0 ||
+    /^file:/i.test(rawPath) ||
+    rawPath.includes("\\")
+  ) {
+    if (
+      typeof rawPath === "string" &&
+      (/^[A-Za-z]:[\\/]/.test(rawPath) || /^(?:\\\\|\/\/)/.test(rawPath))
+    ) {
+      return [{ code: "REGISTRY_PATH_ABSOLUTE", path: rawPath }];
+    }
+    return [{ code: "REGISTRY_PATH_INVALID", path: rawPath }];
+  }
+
+  if (
+    path.posix.isAbsolute(rawPath) ||
+    /^[A-Za-z]:[\\/]/.test(rawPath) ||
+    /^(?:\\\\|\/\/)/.test(rawPath)
+  ) {
+    return [{ code: "REGISTRY_PATH_ABSOLUTE", path: rawPath }];
+  }
+
+  const resolvedPath = path.resolve(baseDirectory, rawPath);
+  const relativeToPackage = path.relative(packageDirectory, resolvedPath);
+  const isOutsidePackage =
+    relativeToPackage === ".." ||
+    relativeToPackage.startsWith(`..${path.sep}`) ||
+    path.isAbsolute(relativeToPackage);
+
+  if (isOutsidePackage) {
+    return [{ code: "REGISTRY_PATH_OUTSIDE_PACKAGE", path: rawPath }];
+  }
+
+  if (!exists(resolvedPath)) {
+    return [{ code: "REGISTRY_PATH_MISSING", path: rawPath }];
+  }
+
+  if (realpath) {
+    const canonicalPath = realpath(resolvedPath);
+    const canonicalPackage = realpath(packageDirectory);
+    const canonicalRelative = path.relative(canonicalPackage, canonicalPath);
+    const canonicalOutside =
+      canonicalRelative === ".." ||
+      canonicalRelative.startsWith(`..${path.sep}`) ||
+      path.isAbsolute(canonicalRelative);
+
+    if (canonicalOutside) {
+      return [{ code: "REGISTRY_PATH_OUTSIDE_PACKAGE", path: rawPath }];
+    }
+  }
+
+  return [];
+}
+
 export function validateRegisteredPaths(
   repositoryRoot,
   entities,
   exists = fs.existsSync,
 ) {
+  const packageDirectory = path.resolve(repositoryRoot, "skills/hallmark");
+
   return entities
     .filter((entity) => typeof entity.path === "string" && entity.path)
-    .filter((entity) => !exists(path.resolve(repositoryRoot, entity.path)))
-    .map((entity) => ({
-      code: "MISSING_REGISTERED_PATH",
-      entityId: entity.id,
-      path: entity.path,
-    }));
+    .flatMap((entity) =>
+      validateRegistryPath({
+        rawPath: entity.path,
+        baseDirectory: repositoryRoot,
+        packageDirectory,
+        exists,
+        realpath: exists === fs.existsSync ? fs.realpathSync : null,
+      }).map((item) => ({ ...item, entityId: entity.id })),
+    );
 }
 
 export function readJson(filePath) {
