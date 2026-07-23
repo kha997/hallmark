@@ -162,6 +162,11 @@ Full JSON Schema vocabulary evaluation, remote `$ref` resolution, arbitrary
 combinator evaluation, format vocabularies beyond the repository's semantic
 versions, and generalized third-party schema validation are deferred.
 
+Documentation link validation covers project documentation and skill Markdown.
+It excludes `site/_tests/`, which contains preserved historical/manual showcase
+fixtures rather than canonical documentation. Phase A intentionally leaves the
+entire `site/` compatibility surface unchanged.
+
 ## Acceptance criteria
 
 The final branch must pass:
