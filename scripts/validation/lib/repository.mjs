@@ -138,7 +138,7 @@ export function validateRegisteredPaths(
   const packageDirectory = path.resolve(repositoryRoot, "skills/hallmark");
 
   return entities
-    .filter((entity) => typeof entity.path === "string" && entity.path)
+    .filter((entity) => Object.hasOwn(entity, "path"))
     .flatMap((entity) =>
       validateRegistryPath({
         rawPath: entity.path,

@@ -108,3 +108,18 @@ test("reports registered paths that do not exist", () => {
     },
   ]);
 });
+
+test("reports an empty registered entity path", () => {
+  assert.deepEqual(
+    validateRegisteredPaths("/repository", [
+      { id: "module.build", path: "" },
+    ]),
+    [
+      {
+        code: "REGISTRY_PATH_INVALID",
+        entityId: "module.build",
+        path: "",
+      },
+    ],
+  );
+});

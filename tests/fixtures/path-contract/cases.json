@@ -1,5 +1,11 @@
 [
   {
+    "name": "rejects an empty registry path",
+    "path": "",
+    "exists": true,
+    "expectedCodes": ["REGISTRY_PATH_INVALID"]
+  },
+  {
     "name": "rejects traversal outside the package",
     "path": "../../outside.md",
     "exists": true,
