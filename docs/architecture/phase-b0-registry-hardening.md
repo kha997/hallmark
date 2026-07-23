@@ -45,6 +45,8 @@ The invocation vocabulary remains unchanged.
 Registry-owned filesystem paths must be relative, portable, and resolve inside
 `skills/hallmark/` after normalization. Validation rejects:
 
+- non-portable separators; registry paths use POSIX-style `/` separators on
+  every platform;
 - absolute POSIX paths;
 - Windows drive-letter paths;
 - UNC paths;
