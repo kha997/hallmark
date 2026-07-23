@@ -116,6 +116,7 @@ const ARRAY_FIELDS = new Set([
   "owns",
   "signals",
 ]);
+const BOOLEAN_FIELDS = new Set(["public", "weighted"]);
 
 function diagnostic(code, details = {}) {
   return { code, ...details };
@@ -213,18 +214,31 @@ export function validateEntityShape(entity, registryName) {
     }
   }
 
-  if (
-    registryName === "modules" &&
-    "public" in entity &&
-    typeof entity.public !== "boolean"
-  ) {
-    diagnostics.push(
-      diagnostic("INVALID_FIELD_TYPE", {
-        entityId: entity.id,
-        field: "public",
-        expected: "boolean",
-      }),
-    );
+  for (const field of required.filter((candidate) => BOOLEAN_FIELDS.has(candidate))) {
+    if (field in entity && typeof entity[field] !== "boolean") {
+      diagnostics.push(
+        diagnostic("INVALID_FIELD_TYPE", {
+          entityId: entity.id,
+          field,
+          expected: "boolean",
+        }),
+      );
+    }
+  }
+
+  for (const field of required.filter(
+    (candidate) =>
+      !ARRAY_FIELDS.has(candidate) && !BOOLEAN_FIELDS.has(candidate),
+  )) {
+    if (field in entity && typeof entity[field] !== "string") {
+      diagnostics.push(
+        diagnostic("INVALID_FIELD_TYPE", {
+          entityId: entity.id,
+          field,
+          expected: "string",
+        }),
+      );
+    }
   }
 
   return diagnostics;
@@ -273,6 +287,17 @@ export function validateRegistry(root = repositoryRoot) {
 
   const registryDocuments = Object.entries(manifest.registries ?? {}).map(
     ([name, relativePath]) => {
+      if (typeof relativePath !== "string") {
+        diagnostics.push(
+          diagnostic("INVALID_FIELD_TYPE", {
+            entityId: "registry.manifest",
+            field: `registries.${name}`,
+            expected: "string",
+          }),
+        );
+        return { name, relativePath, entities: [] };
+      }
+
       const filePath = path.join(directory, relativePath);
       if (!fs.existsSync(filePath)) {
         diagnostics.push(
@@ -293,6 +318,9 @@ export function validateRegistry(root = repositoryRoot) {
           );
         }
       }
+      const entities = Array.isArray(document.entities)
+        ? document.entities
+        : [];
       if (!Array.isArray(document.entities)) {
         diagnostics.push(
           diagnostic("INVALID_FIELD_TYPE", {
@@ -302,7 +330,7 @@ export function validateRegistry(root = repositoryRoot) {
           }),
         );
       }
-      return { name, relativePath, entities: document.entities ?? [] };
+      return { name, relativePath, entities };
     },
   );
 

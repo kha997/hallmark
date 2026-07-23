@@ -62,7 +62,7 @@ export function validateRegisteredPaths(
   exists = fs.existsSync,
 ) {
   return entities
-    .filter((entity) => entity.path)
+    .filter((entity) => typeof entity.path === "string" && entity.path)
     .filter((entity) => !exists(path.resolve(repositoryRoot, entity.path)))
     .map((entity) => ({
       code: "MISSING_REGISTERED_PATH",
