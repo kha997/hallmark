@@ -1,0 +1,76 @@
+{
+  "schemaVersion": "1.0.0",
+  "registryVersion": "1.0.0",
+  "entities": [
+    {
+      "id": "module.build",
+      "schemaVersion": "1.0.0",
+      "version": "1.1.0",
+      "status": "confirmed",
+      "path": "skills/hallmark/SKILL.md",
+      "public": true,
+      "intents": ["build"],
+      "dependencies": [
+        "principle.anti-ai-slop",
+        "principle.color",
+        "principle.layout-and-space",
+        "principle.structural-variety",
+        "principle.typography"
+      ],
+      "appliesTo": ["domain.page", "domain.component", "domain.landing-page", "domain.saas"],
+      "capabilities": ["page-build", "component-build", "preflight", "design-context-routing"],
+      "outputs": ["output.artifact", "output.tokens.css"],
+      "owns": ["capability.intent.build"]
+    },
+    {
+      "id": "module.audit",
+      "schemaVersion": "1.0.0",
+      "version": "1.1.0",
+      "status": "confirmed",
+      "path": "skills/hallmark/references/verbs/audit.md",
+      "public": true,
+      "intents": ["audit"],
+      "dependencies": ["principle.anti-ai-slop", "evaluation.slop-test"],
+      "appliesTo": [],
+      "capabilities": ["read-only-evaluation", "ranked-findings"],
+      "outputs": ["output.report.markdown"],
+      "owns": ["capability.intent.audit"]
+    },
+    {
+      "id": "module.redesign",
+      "schemaVersion": "1.0.0",
+      "version": "1.1.0",
+      "status": "confirmed",
+      "path": "skills/hallmark/references/verbs/redesign.md",
+      "public": true,
+      "intents": ["redesign"],
+      "dependencies": [
+        "principle.anti-ai-slop",
+        "principle.structural-variety",
+        "principle.typography"
+      ],
+      "appliesTo": ["domain.page", "domain.landing-page", "domain.saas"],
+      "capabilities": ["in-place-redesign", "multi-page-coherence", "design-system-export"],
+      "outputs": ["output.artifact", "output.design.md", "output.tokens.css"],
+      "owns": ["capability.intent.redesign"]
+    },
+    {
+      "id": "module.study",
+      "schemaVersion": "1.0.0",
+      "version": "1.1.0",
+      "status": "confirmed",
+      "path": "skills/hallmark/references/study.md",
+      "public": true,
+      "intents": ["study"],
+      "dependencies": [
+        "principle.color",
+        "principle.structural-variety",
+        "principle.typography"
+      ],
+      "appliesTo": [],
+      "capabilities": ["image-dna-extraction", "url-dna-extraction", "design-system-export"],
+      "outputs": ["output.report.markdown", "output.design.md"],
+      "owns": ["capability.intent.study"]
+    }
+  ]
+}

@@ -1,0 +1,46 @@
+{
+  "schemaVersion": "1.0.0",
+  "registryVersion": "1.0.0",
+  "entities": [
+    {
+      "id": "domain.component",
+      "schemaVersion": "1.0.0",
+      "version": "1.1.0",
+      "status": "confirmed",
+      "path": "skills/hallmark/SKILL.md",
+      "signals": ["single UI element", "single component file", "component-only request"],
+      "dependencies": [],
+      "owns": ["domain-routing.component"]
+    },
+    {
+      "id": "domain.landing-page",
+      "schemaVersion": "1.0.0",
+      "version": "1.1.0",
+      "status": "confirmed",
+      "path": "skills/hallmark/SKILL.md",
+      "signals": ["landing page", "multi-section brief", "marketing page"],
+      "dependencies": ["domain.page"],
+      "owns": ["domain-routing.landing-page"]
+    },
+    {
+      "id": "domain.page",
+      "schemaVersion": "1.0.0",
+      "version": "1.1.0",
+      "status": "confirmed",
+      "path": "skills/hallmark/SKILL.md",
+      "signals": ["multi-section brief", "whole page"],
+      "dependencies": [],
+      "owns": ["domain-routing.page"]
+    },
+    {
+      "id": "domain.saas",
+      "schemaVersion": "1.0.0",
+      "version": "1.1.0",
+      "status": "confirmed",
+      "path": "skills/hallmark/SKILL.md",
+      "signals": ["SaaS", "enterprise", "API", "platform", "developer tool", "B2B"],
+      "dependencies": ["domain.landing-page"],
+      "owns": ["domain-routing.saas"]
+    }
+  ]
+}
