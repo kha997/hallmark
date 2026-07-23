@@ -33,6 +33,7 @@
     "serve": "python3 -m http.server --directory site 4173",
     "test": "node --test",
     "validate:registry": "node scripts/validation/validate-registry.mjs",
-    "validate": "npm run validate:registry"
+    "validate:docs": "node scripts/validation/validate-docs.mjs",
+    "validate": "npm run validate:registry && npm run validate:docs"
   }
 }
