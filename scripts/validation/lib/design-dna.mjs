@@ -13,6 +13,12 @@ const STRING_FIELDS = ['id', 'name', 'version', 'status', 'genre', 'entry', 'tok
 
 const VALID_STATUSES = new Set(['active', 'deprecated', 'draft']);
 
+function isPlainObject(value) {
+  return value !== null
+    && typeof value === 'object'
+    && !Array.isArray(value);
+}
+
 /**
  * Find a Design DNA by its canonical ID.
  * @param {string} id
@@ -21,7 +27,8 @@ const VALID_STATUSES = new Set(['active', 'deprecated', 'draft']);
  */
 export function resolveDna(id, registry) {
   if (!registry || !Array.isArray(registry.designDnas)) return null;
-  return registry.designDnas.find(dna => dna.id === id) ?? null;
+  if (typeof id !== 'string' && typeof id !== 'number') return null;
+  return registry.designDnas.find(dna => dna && dna.id === String(id)) ?? null;
 }
 
 /**
@@ -33,9 +40,11 @@ export function resolveDna(id, registry) {
  */
 export function resolveDnaByName(name, registry) {
   if (!registry || !Array.isArray(registry.designDnas)) return null;
+  if (typeof name !== 'string') return null;
+  const lowerName = name.toLowerCase();
   return registry.designDnas.find(dna =>
-    dna.activation?.explicitNames?.some(en =>
-      en === name || en.toLowerCase() === name.toLowerCase()
+    dna?.activation?.explicitNames?.some(en =>
+      typeof en === 'string' && (en === name || en.toLowerCase() === lowerName)
     )
   ) ?? null;
 }
@@ -47,7 +56,8 @@ export function resolveDnaByName(name, registry) {
  * @returns {object|null}
  */
 export function resolveDnaByMarker(content, registry) {
-  if (!content || !registry || !Array.isArray(registry.designDnas)) return null;
+  if (!content || typeof content !== 'string') return null;
+  if (!registry || !Array.isArray(registry.designDnas)) return null;
   const markerMatch = content.match(/hallmark_design_dna:\s*([\w-]+)/);
   if (!markerMatch) return null;
   const dnaId = markerMatch[1];
@@ -86,8 +96,8 @@ export function validateDnaRegistry(registry, options = {}) {
 
   const seenIds = new Map();
 
-  for (const dna of registry.designDnas) {
-    diagnostics.push(...validateDnaEntry(dna, presetsBase, seenIds));
+  for (let i = 0; i < registry.designDnas.length; i++) {
+    diagnostics.push(...validateDnaEntry(registry.designDnas[i], presetsBase, seenIds, i));
   }
 
   return diagnostics;
@@ -100,9 +110,19 @@ export function validateDnaRegistry(registry, options = {}) {
  * @param {Map<string, string>} seenIds
  * @returns {Array<{code: string, entityId: string, [key: string]: any}>}
  */
-export function validateDnaEntry(dna, presetsBase, seenIds = new Map()) {
+export function validateDnaEntry(dna, presetsBase, seenIds = new Map(), entryIndex) {
   const diagnostics = [];
-  const entityId = dna?.id ?? 'unknown';
+  const location = entryIndex !== undefined ? `designDnas[${entryIndex}]` : null;
+
+  if (!isPlainObject(dna)) {
+    diagnostics.push({
+      code: 'DESIGN_DNA_ENTRY_NOT_OBJECT',
+      ...(location ? { location } : {})
+    });
+    return diagnostics;
+  }
+
+  const entityId = dna.id ?? 'unknown';
 
   // Check required fields
   for (const field of REQUIRED_DNA_FIELDS) {
