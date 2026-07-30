@@ -22,7 +22,11 @@ test('ZENA Enterprise SaaS preset ships the complete portable design DNA', async
   assert.match(design, /320 px, 375 px, 414 px and 768 px/);
 
   assert.match(tokens, /--zena-color-primary:/);
+  assert.match(tokens, /--zena-color-info:/);
+  assert.match(tokens, /--zena-color-info-soft:/);
   assert.match(tokens, /--zena-font-sans:/);
+  assert.match(tokens, /--zena-font-feature-settings:/);
+  assert.match(tokens, /--zena-radius-round:/);
   assert.match(tokens, /--zena-sidebar-width:/);
   assert.doesNotMatch(tokens, /!important/);
 

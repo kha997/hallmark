@@ -1,0 +1,39 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://kha997.github.io/hallmark/schemas/design-dna.schema.json",
+  "title": "Hallmark Design DNA Registry Entry",
+  "type": "object",
+  "required": ["id", "name", "version", "status", "genre", "entry", "tokens", "components", "layouts", "activation"],
+  "properties": {
+    "id": { "type": "string", "pattern": "^[a-z0-9]+(?:-[a-z0-9]+)*$", "description": "Canonical identifier for the Design DNA. Used in project markers and explicit references." },
+    "name": { "type": "string", "minLength": 1, "description": "Human-readable display name." },
+    "version": { "type": "string", "pattern": "^\\d+\\.\\d+\\.\\d+$", "description": "Semantic version of this Design DNA." },
+    "status": { "enum": ["active", "deprecated", "draft"], "description": "Publication status." },
+    "genre": { "type": "string", "description": "Hallmark genre this DNA belongs to (editorial, modern-minimal, atmospheric, playful)." },
+    "description": { "type": "string", "description": "One-line summary of the DNA purpose." },
+    "entry": { "type": "string", "pattern": "^presets/[^/]+/design\\.md$", "description": "Path to the design intent document, relative to skills/hallmark/presets/." },
+    "tokens": { "type": "string", "pattern": "^presets/[^/]+/tokens\\.css$", "description": "Path to the token contract CSS file." },
+    "components": { "type": "string", "pattern": "^presets/[^/]+/components\\.md$", "description": "Path to the component specification." },
+    "layouts": { "type": "string", "pattern": "^presets/[^/]+/layouts\\.md$", "description": "Path to the layout specification." },
+    "activation": {
+      "type": "object",
+      "required": ["explicitNames", "projectMarkers"],
+      "additionalProperties": false,
+      "properties": {
+        "explicitNames": {
+          "type": "array",
+          "minItems": 1,
+          "items": { "type": "string", "minLength": 1 },
+          "description": "Names that users or AI assistants can use to explicitly select this DNA."
+        },
+        "projectMarkers": {
+          "type": "array",
+          "minItems": 1,
+          "items": { "type": "string", "pattern": "^hallmark_design_dna:" },
+          "description": "Canonical marker patterns detected in project design.md to auto-activate this DNA."
+        }
+      }
+    }
+  },
+  "additionalProperties": false
+}

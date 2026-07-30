@@ -20,6 +20,7 @@ import {
   validateRegistryPath,
   validateRegisteredPaths,
 } from "./lib/repository.mjs";
+import { validateDnaRegistry } from "./lib/design-dna.mjs";
 
 const scriptDirectory = path.dirname(fileURLToPath(import.meta.url));
 const repositoryRoot = path.resolve(scriptDirectory, "../..");
@@ -431,6 +432,16 @@ function formatDiagnostic(item) {
 
 if (path.resolve(process.argv[1]) === fileURLToPath(import.meta.url)) {
   const diagnostics = validateRegistry(repositoryRoot);
+
+  // Validate Design DNA registry
+  const designDnaPath = path.join(repositoryRoot, "skills/hallmark/design-dna/registry.json");
+  if (fs.existsSync(designDnaPath)) {
+    const designDnaRegistry = readJson(designDnaPath);
+    const dnaDiagnostics = validateDnaRegistry(designDnaRegistry, {
+      presetsBase: path.join(repositoryRoot, "skills/hallmark/presets"),
+    });
+    diagnostics.push(...dnaDiagnostics.map((d) => ({ ...d, registry: "design-dna" })));
+  }
 
   if (diagnostics.length > 0) {
     for (const item of diagnostics) console.error(formatDiagnostic(item));
