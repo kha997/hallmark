@@ -39,16 +39,18 @@ jobs:
         run: node scripts/validation/validate-docs.mjs
 
       - name: Validate tag format
+        env:
+          TAG: ${{ inputs.tag }}
         run: |
-          TAG="${{ github.event.inputs.tag }}"
-          if ! echo "$TAG" | grep -qE '^v[0-9]+\.[0-9]+\.[0-9]+$'; then
+          if [[ ! "$TAG" =~ ^v[0-9]+\.[0-9]+\.[0-9]+$ ]]; then
             echo "error: tag '$TAG' does not match SemVer pattern vMAJOR.MINOR.PATCH"
             exit 1
           fi
 
       - name: Check tag does not already exist
+        env:
+          TAG: ${{ inputs.tag }}
         run: |
-          TAG="${{ github.event.inputs.tag }}"
           if git tag --list | grep -qF "$TAG"; then
             echo "error: tag '$TAG' already exists"
             exit 1
@@ -63,12 +65,21 @@ jobs:
           fi
 
       - name: Create draft release
-        run: |
-          gh release create "${{ github.event.inputs.tag }}" \
-            --target "$GITHUB_SHA" \
-            --title "${{ github.event.inputs.tag }}" \
-            --generate-notes \
-            --draft \
-            ${{ github.event.inputs.prerelease == 'true' && '--prerelease' || '' }}
         env:
           GH_TOKEN: ${{ github.token }}
+          TAG: ${{ inputs.tag }}
+          PRERELEASE: ${{ inputs.prerelease }}
+        run: |
+          args=(
+            "$TAG"
+            --target "$GITHUB_SHA"
+            --title "$TAG"
+            --generate-notes
+            --draft
+          )
+
+          if [[ "$PRERELEASE" == "true" ]]; then
+            args+=(--prerelease)
+          fi
+
+          gh release create "${args[@]}"
