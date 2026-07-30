@@ -51,7 +51,7 @@ jobs:
         env:
           TAG: ${{ inputs.tag }}
         run: |
-          if git tag --list | grep -qF "$TAG"; then
+          if git tag --list | grep -qxF "$TAG"; then
             echo "error: tag '$TAG' already exists"
             exit 1
           fi
