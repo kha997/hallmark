@@ -1,0 +1,74 @@
+name: Release
+
+on:
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: 'Release tag (e.g. v1.1.0)'
+        required: true
+        type: string
+      prerelease:
+        description: 'Mark as prerelease'
+        required: false
+        default: false
+        type: boolean
+
+permissions:
+  contents: write
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Use Node.js 22
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+
+      - name: Run tests
+        run: node --test
+
+      - name: Validate registry
+        run: node scripts/validation/validate-registry.mjs
+
+      - name: Validate docs
+        run: node scripts/validation/validate-docs.mjs
+
+      - name: Validate tag format
+        run: |
+          TAG="${{ github.event.inputs.tag }}"
+          if ! echo "$TAG" | grep -qE '^v[0-9]+\.[0-9]+\.[0-9]+$'; then
+            echo "error: tag '$TAG' does not match SemVer pattern vMAJOR.MINOR.PATCH"
+            exit 1
+          fi
+
+      - name: Check tag does not already exist
+        run: |
+          TAG="${{ github.event.inputs.tag }}"
+          if git tag --list | grep -qF "$TAG"; then
+            echo "error: tag '$TAG' already exists"
+            exit 1
+          fi
+
+      - name: Check running from main
+        run: |
+          BRANCH="${GITHUB_REF#refs/heads/}"
+          if [ "$BRANCH" != "main" ]; then
+            echo "error: release workflow must run from main (current: $BRANCH)"
+            exit 1
+          fi
+
+      - name: Create draft release
+        run: |
+          gh release create "${{ github.event.inputs.tag }}" \
+            --target "$GITHUB_SHA" \
+            --title "${{ github.event.inputs.tag }}" \
+            --generate-notes \
+            --draft \
+            ${{ github.event.inputs.prerelease == 'true' && '--prerelease' || '' }}
+        env:
+          GH_TOKEN: ${{ github.token }}
