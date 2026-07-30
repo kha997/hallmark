@@ -1,0 +1,28 @@
+{
+  "schemaVersion": "1.0.0",
+  "description": "Hallmark Design DNA registry. Each entry is a structured, portable design system for a specific product domain. DNAs are activated by explicit name, by project design.md marker, or by user selection.",
+  "designDnas": [
+    {
+      "id": "zena-enterprise-saas",
+      "name": "ZENA Enterprise SaaS",
+      "version": "1.0.0",
+      "status": "active",
+      "genre": "modern-minimal",
+      "description": "Calm, precise and information-dense design system for ZENA business applications: CRM, customers, quotations, contracts, projects, design delivery, construction, warranty, finance and reporting.",
+      "entry": "presets/zena-enterprise-saas/design.md",
+      "tokens": "presets/zena-enterprise-saas/tokens.css",
+      "components": "presets/zena-enterprise-saas/components.md",
+      "layouts": "presets/zena-enterprise-saas/layouts.md",
+      "activation": {
+        "explicitNames": [
+          "ZENA Enterprise SaaS",
+          "zena-enterprise-saas",
+          "ZENA"
+        ],
+        "projectMarkers": [
+          "hallmark_design_dna: zena-enterprise-saas"
+        ]
+      }
+    }
+  ]
+}
